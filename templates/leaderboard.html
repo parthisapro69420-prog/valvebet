@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard - VaultBet{% endblock %}
+
+{% block content %}
+<div class="leaderboard-wrapper">
+    <div class="section-title">
+        <span>🏆 VaultBet Leaderboard</span>
+        <span style="font-size: 0.9rem; color: var(--gold); font-weight: 500;">Ranked by all-time credits won</span>
+    </div>
+    
+    <table class="leaderboard-table">
+        <thead>
+            <tr>
+                <th style="width: 100px;">Rank</th>
+                <th>Player</th>
+                <th>All-time Won</th>
+                <th>Current Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in top_users %}
+            <tr class="{% if row.username == user.username %}highlight{% endif %}">
+                <td>
+                    <span class="rank-badge rank-{{ loop.index }}">
+                        {{ loop.index }}
+                    </span>
+                </td>
+                <td style="font-weight: 600;">
+                    {{ row.username }} {% if row.username == user.username %}(You){% endif %}
+                </td>
+                <td class="neon-green" style="font-weight: 600;">
+                    {{ row.total_won }} Cr
+                </td>
+                <td class="{% if row.balance >= 0 %}neon-green{% else %}neon-red{% endif %}">
+                    {{ row.balance }} Cr
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- User Personal Rank Highlight (if outside top 10) -->
+    {% if user_rank_info and user_rank_info.rank > 10 %}
+    <div class="leaderboard-divider"></div>
+    
+    <div class="leaderboard-personal">
+        <h4 class="leaderboard-personal-title">🎯 Your Standings</h4>
+        <table class="leaderboard-table" style="margin-top: 0.5rem;">
+            <tbody>
+                <tr class="highlight">
+                    <td style="width: 100px;">
+                        <span class="rank-badge" style="background: var(--gold); color: #000;">
+                            {{ user_rank_info.rank }}
+                        </span>
+                    </td>
+                    <td style="font-weight: 600;">
+                        {{ user_rank_info.username }} (You)
+                    </td>
+                    <td class="neon-green" style="font-weight: 600;">
+                        {{ user_rank_info.total_won }} Cr
+                    </td>
+                    <td class="{% if user_rank_info.balance >= 0 %}neon-green{% else %}neon-red{% endif %}">
+                        {{ user_rank_info.balance }} Cr
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

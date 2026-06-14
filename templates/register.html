@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Register - VaultBet{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2 class="auth-title">Vault<span>Bet</span></h2>
+            <p class="auth-subtitle">Create a new account and get 500 free credits</p>
+        </div>
+        
+        {% if error %}
+        <div class="error-alert">
+            {{ error }}
+        </div>
+        {% endif %}
+        
+        <form action="/auth/register" method="post">
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" id="username" class="form-input" required placeholder="Pick a username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" class="form-input" required placeholder="Choose a password">
+            </div>
+            
+            <button type="submit" class="btn-primary">Register</button>
+        </form>
+        
+        <div class="auth-footer">
+            Already have an account? <a href="/auth/login">Log In</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

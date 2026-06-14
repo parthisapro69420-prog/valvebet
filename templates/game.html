@@ -1,0 +1,1051 @@
+{% extends "base.html" %}
+
+{% block title %}{{ game_info.name }} - VaultBet{% endblock %}
+
+{% block content %}
+<div class="game-container">
+    <div class="game-header">
+        <div>
+            <h2 class="auth-title" style="margin-bottom: 0;">{{ game_info.name }}</h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.2rem;">Min Bet: {{ game_info.min_bet }} credits</p>
+        </div>
+        <button class="game-info-btn" id="info-btn" title="How to Play">ⓘ</button>
+    </div>
+
+    <!-- Play Area -->
+    <div class="game-play-area">
+        
+        <!-- Game 1: Coin Flip -->
+        {% if game_id == 'coin_flip' %}
+        <div class="coin-graphic" id="coin-element">H</div>
+        <div class="roulette-picker">
+            <button class="roulette-bet-btn btn-red selected" id="coin-heads" onclick="selectCoinSide('heads')">Heads</button>
+            <button class="roulette-bet-btn btn-black" id="coin-tails" onclick="selectCoinSide('tails')">Tails</button>
+        </div>
+        {% endif %}
+
+        <!-- Game 2: Dice Roll -->
+        {% if game_id == 'dice_roll' %}
+        <div class="dice-graphic" id="dice-element">⚀</div>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">Roll > 3 (4, 5, 6) wins 1.8x payout!</p>
+        {% endif %}
+
+        <!-- Game 3: Slots -->
+        {% if game_id == 'slots' %}
+        <div class="slot-machine-display">
+            <div class="slot-reel" id="reel-1">🍒</div>
+            <div class="slot-reel" id="reel-2">🍋</div>
+            <div class="slot-reel" id="reel-3">🍇</div>
+        </div>
+        {% endif %}
+
+        <!-- Game 4: Roulette -->
+        {% if game_id == 'roulette' %}
+        <div class="roulette-wheel-spin-display" id="roulette-wheel-result">Place bet and spin!</div>
+        <div class="roulette-picker">
+            <button class="roulette-bet-btn btn-red selected" id="roulette-red" onclick="selectRouletteColor('red')">Red (2x)</button>
+            <button class="roulette-bet-btn btn-black" id="roulette-black" onclick="selectRouletteColor('black')">Black (2x)</button>
+            <button class="roulette-bet-btn btn-green" id="roulette-green" onclick="selectRouletteColor('green')">Green (14x)</button>
+        </div>
+        {% endif %}
+
+        <!-- Game 5: Hi-Lo Card -->
+        {% if game_id == 'hilo' %}
+        <div class="card-display">
+            <div class="playing-card" id="hilo-card">
+                <div class="card-value" id="hilo-card-val">A</div>
+                <div class="card-suit" id="hilo-card-suit">♠</div>
+                <div class="card-bottom" id="hilo-card-val-bot">A</div>
+            </div>
+        </div>
+        <div class="hilo-actions">
+            <button class="btn-hilo btn-hi" onclick="playHilo('hi')">Higher (1.9x)</button>
+            <button class="btn-hilo btn-lo" onclick="playHilo('lo')">Lower (1.9x)</button>
+        </div>
+        {% endif %}
+
+        <!-- Game 6: Lucky Number -->
+        {% if game_id == 'lucky_number' %}
+        <div class="roulette-wheel-spin-display" id="lucky-num-result" style="width:100px; height:100px; line-height:65px; border-radius:50%; margin:0 auto;">?</div>
+        <div class="form-group" style="width: 100%; max-width: 300px; text-align: center;">
+            <label class="form-label">Choose number (1-10)</label>
+            <select id="lucky-number-choice" class="form-input" style="text-align: center;">
+                {% for i in range(1, 11) %}
+                <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <!-- Game 7: Crash Multiplier -->
+        {% if game_id == 'crash' %}
+        <div class="crash-graph-container">
+            <canvas id="crash-canvas" class="crash-canvas" width="500" height="250"></canvas>
+            <div class="crash-multiplier-display" id="crash-multiplier">1.00x</div>
+        </div>
+        {% endif %}
+
+        <!-- Game 8: Scratch Card -->
+        {% if game_id == 'scratch' %}
+        <div class="scratch-grid" id="scratch-grid-board">
+            {% for idx in range(9) %}
+            <div class="scratch-cell" id="scratch-cell-{{ idx }}" onclick="scratchCell({{ idx }})">?</div>
+            {% endfor %}
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;" id="scratch-prompt">Place a bet first to buy a scratch card!</p>
+        {% endif %}
+
+        <!-- Game 9: Plinko Drop -->
+        {% if game_id == 'plinko' %}
+        <canvas id="plinko-canvas" class="plinko-canvas" width="400" height="300"></canvas>
+        <div class="plinko-multipliers">
+            <div class="plinko-bin" style="background:#f39c12;">3.0x</div>
+            <div class="plinko-bin" style="background:#f1c40f;">1.5x</div>
+            <div class="plinko-bin" style="background:#2ecc71;">1.0x</div>
+            <div class="plinko-bin" style="background:#2ecc71;">1.0x</div>
+            <div class="plinko-bin" style="background:#e67e22;">0.5x</div>
+            <div class="plinko-bin" style="background:#e74c3c;">0.0x</div>
+        </div>
+        {% endif %}
+
+        <!-- Game 10: War (Card Battle) -->
+        {% if game_id == 'war' %}
+        <div class="card-display">
+            <div style="text-align: center;">
+                <p style="color:var(--text-secondary); margin-bottom:0.5rem;">You</p>
+                <div class="playing-card" id="war-player-card">
+                    <div class="card-value" id="war-p-val">?</div>
+                    <div class="card-suit" id="war-p-suit">♣</div>
+                    <div class="card-bottom" id="war-p-val-bot">?</div>
+                </div>
+            </div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold);">VS</div>
+            <div style="text-align: center;">
+                <p style="color:var(--text-secondary); margin-bottom:0.5rem;">House</p>
+                <div class="playing-card" id="war-dealer-card">
+                    <div class="card-value" id="war-d-val">?</div>
+                    <div class="card-suit" id="war-d-suit">♦</div>
+                    <div class="card-bottom" id="war-d-val-bot">?</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Game 11: Number Roulette -->
+        {% if game_id == 'number_roulette' %}
+        <div class="roulette-wheel-spin-display" id="num-roulette-result">Place bet and spin!</div>
+        <div class="form-group" style="width: 100%; max-width: 300px; text-align: center;">
+            <label class="form-label">Pick Number (0-36)</label>
+            <select id="num-roulette-choice" class="form-input" style="text-align: center;">
+                {% for i in range(37) %}
+                <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <!-- Game 12: Wheel of Fortune -->
+        {% if game_id == 'wheel' %}
+        <div class="wheel-wrapper">
+            <div class="wheel-pointer"></div>
+            <!-- Standard CSS/Canvas or image based wheel. We will draw a CSS colored wheel -->
+            <div class="wheel-graphic-container" id="wheel-element" style="background: conic-gradient(
+                #f39c12 0% 12.5%,
+                #34495e 12.5% 25%,
+                #2ecc71 25% 37.5%,
+                #34495e 37.5% 50%,
+                #e67e22 50% 62.5%,
+                #34495e 62.5% 75%,
+                #9b59b6 75% 87.5%,
+                #34495e 87.5% 100%
+            );">
+                <!-- Draw labels inside segments using absolute positioned texts rotated -->
+                <div style="position:absolute; top:20px; left:120px; transform:rotate(22.5deg); font-weight:bold; color:#000;">3.0x</div>
+                <div style="position:absolute; top:55px; left:185px; transform:rotate(67.5deg); font-weight:bold; color:#fff;">0x</div>
+                <div style="position:absolute; top:120px; left:200px; transform:rotate(112.5deg); font-weight:bold; color:#000;">1.5x</div>
+                <div style="position:absolute; top:185px; left:170px; transform:rotate(157.5deg); font-weight:bold; color:#fff;">0x</div>
+                <div style="position:absolute; top:200px; left:105px; transform:rotate(202.5deg); font-weight:bold; color:#000;">2.0x</div>
+                <div style="position:absolute; top:165px; left:40px; transform:rotate(247.5deg); font-weight:bold; color:#fff;">0x</div>
+                <div style="position:absolute; top:100px; left:30px; transform:rotate(292.5deg); font-weight:bold; color:#fff;">5.0x</div>
+                <div style="position:absolute; top:40px; left:60px; transform:rotate(337.5deg); font-weight:bold; color:#fff;">0x</div>
+            </div>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; text-align: center;">Segments: 3x (Gold), 0x (Dark), 1.5x (Green), 0x (Dark), 2x (Orange), 0x (Dark), 5x (Purple), 0x (Dark)</p>
+        {% endif %}
+
+    </div>
+
+    <!-- Controls -->
+    <div class="game-controls">
+        <div class="bet-input-wrapper">
+            <label for="bet-amount">Bet</label>
+            <input type="number" id="bet-amount" class="bet-input" min="{{ game_info.min_bet }}" value="{{ game_info.min_bet }}">
+        </div>
+        
+        <!-- Crash has custom button toggles -->
+        {% if game_id == 'crash' %}
+        <button id="btn-crash-action" class="btn-game-submit" onclick="handleCrashAction()">Start Flight</button>
+        {% else %}
+        <button id="btn-play-submit" class="btn-game-submit" onclick="submitBet()">Place Bet</button>
+        {% endif %}
+    </div>
+
+    <!-- Result Display Container -->
+    <div id="result-container" style="display: none;">
+        <div class="result-message" id="result-msg"></div>
+    </div>
+</div>
+
+<!-- "How to Play" Modal -->
+<div class="modal-overlay" id="tutorial-modal">
+    <div class="modal-card">
+        <button class="modal-close" onclick="closeTutorial()">×</button>
+        <h3 class="modal-title">📖 How to Play: {{ game_info.name }}</h3>
+        <div class="modal-content">
+            <p>{{ game_info.instructions }}</p>
+            <p style="margin-top: 1rem; font-weight: bold; color: var(--gold);">Payout Rule:</p>
+            <ul>
+                {% if game_id == 'coin_flip' %}
+                <li>Correct prediction pays 2x the bet amount.</li>
+                <li>Incorrect prediction loses the bet.</li>
+                {% elif game_id == 'dice_roll' %}
+                <li>A die outcome of 4, 5, or 6 pays 1.8x the bet amount.</li>
+                <li>A die outcome of 1, 2, or 3 loses the bet.</li>
+                {% elif game_id == 'slots' %}
+                <li>Match 3 identical symbols to win a massive 10x payout.</li>
+                <li>Match 2 identical symbols to win a 1.5x payout.</li>
+                <li>No matching symbols loses the bet.</li>
+                {% elif game_id == 'roulette' %}
+                <li>Red pays 2x. Black pays 2x. Green (0) pays 14x.</li>
+                <li>If the ball lands on any other color, you lose.</li>
+                {% elif game_id == 'hilo' %}
+                <li>Guess if the next card drawn (1-13) will be Higher or Lower than the current card.</li>
+                <li>Correct guess pays 1.9x.</li>
+                <li>Same value (Tie) returns the bet (Push).</li>
+                <li>Incorrect guess loses the bet.</li>
+                {% elif game_id == 'lucky_number' %}
+                <li>Pick a number between 1 and 10.</li>
+                <li>If the host draws that exact number, you win 8x. Otherwise you lose.</li>
+                {% elif game_id == 'crash' %}
+                <li>The multiplier climbs from 1.0x up to 10.0x.</li>
+                <li>Click "Cash Out" before the rocket crashes to win your bet multiplied by the current value.</li>
+                <li>If the rocket crashes before you cash out, you lose your entire bet.</li>
+                {% elif game_id == 'scratch' %}
+                <li>Place a bet to buy a card.</li>
+                <li>Scratch (click) exactly 3 cells.</li>
+                <li>Match 2 symbols under your 3 cells to win 2x.</li>
+                <li>Match 3 symbols under your 3 cells to win 15x.</li>
+                {% elif game_id == 'plinko' %}
+                <li>A ball drops from the top and bounces off pegs.</li>
+                <li>It lands in one of the 6 buckets at the bottom.</li>
+                <li>Landing bucket multipliers are: 3x, 1.5x, 1x, 1x, 0.5x, 0x.</li>
+                {% elif game_id == 'war' %}
+                <li>Both you and the dealer draw a card.</li>
+                <li>Higher card wins a 1.9x payout.</li>
+                <li>If cards have equal values, it is a Push (bet is refunded).</li>
+                {% elif game_id == 'number_roulette' %}
+                <li>Pick an exact number between 0 and 36.</li>
+                <li>An exact match pays a huge 30x. Otherwise you lose.</li>
+                {% elif game_id == 'wheel' %}
+                <li>Spin the wheel.</li>
+                <li>Landing multiplier is applied directly (3x, 0x, 1.5x, 0x, 2x, 0x, 5x, 0x).</li>
+                {% endif %}
+            </ul>
+        </div>
+        <button class="btn-primary btn-modal-close" onclick="closeTutorial()">Let's Play!</button>
+    </div>
+</div>
+
+<script>
+    // --- Global Tutorial Logic ---
+    const gameId = "{{ game_id }}";
+    
+    // Check if user has seen tutorial
+    if (!localStorage.getItem("viewed_tutorial_" + gameId)) {
+        document.getElementById("tutorial-modal").style.display = "flex";
+        localStorage.setItem("viewed_tutorial_" + gameId, "true");
+    }
+
+    document.getElementById("info-btn").addEventListener("click", () => {
+        document.getElementById("tutorial-modal").style.display = "flex";
+    });
+
+    function closeTutorial() {
+        document.getElementById("tutorial-modal").style.display = "none";
+    }
+
+    // --- Helper to refresh global balance badge ---
+    function updateHeaderBalance(newBalance) {
+        const badges = document.querySelectorAll(".balance-badge");
+        badges.forEach(badge => {
+            badge.className = "balance-badge " + (newBalance >= 0 ? "positive" : "negative");
+            badge.innerText = newBalance < 0 ? `⚠️ IN DEBT: ${newBalance} Cr` : `💰 ${newBalance} Cr`;
+        });
+        
+        // Update debt banner if exist or inject
+        let banner = document.querySelector(".debt-banner");
+        if (newBalance < 0) {
+            if (!banner) {
+                banner = document.createElement("div");
+                banner.className = "debt-banner";
+                document.body.insertBefore(banner, document.body.firstChild);
+            }
+            banner.innerHTML = `⚠️ IN DEBT: Your balance is negative (${newBalance} credits). Please repay your loans or win credits to restore your account balance!`;
+        } else {
+            if (banner) {
+                banner.remove();
+            }
+        }
+    }
+
+    // --- Game Selection Choice Keepers ---
+    let coinSide = 'heads';
+    function selectCoinSide(side) {
+        coinSide = side;
+        document.getElementById("coin-heads").classList.remove("selected");
+        document.getElementById("coin-tails").classList.remove("selected");
+        if (side === 'heads') {
+            document.getElementById("coin-heads").classList.add("selected");
+        } else {
+            document.getElementById("coin-tails").classList.add("selected");
+        }
+    }
+
+    let rouletteColor = 'red';
+    function selectRouletteColor(color) {
+        rouletteColor = color;
+        document.getElementById("roulette-red").classList.remove("selected");
+        document.getElementById("roulette-black").classList.remove("selected");
+        document.getElementById("roulette-green").classList.remove("selected");
+        document.getElementById("roulette-" + color).classList.add("selected");
+    }
+
+    // --- Scratch Card States ---
+    let scratchCardActive = false;
+    let scratchedCells = [];
+    let scratchResponseData = null;
+
+    function scratchCell(index) {
+        if (!scratchCardActive) {
+            alert("Please place a bet first!");
+            return;
+        }
+        if (scratchedCells.includes(index)) return;
+        if (scratchedCells.length >= 3) return;
+
+        scratchedCells.push(index);
+        const cell = document.getElementById("scratch-cell-" + index);
+        cell.classList.add("scratched");
+        // Reveal symbol from backend
+        cell.innerText = scratchResponseData.symbols[index];
+
+        if (scratchedCells.length === 3) {
+            // Finished scratch
+            scratchCardActive = false;
+            
+            // Call server to claim reward based on the selected 3 cells
+            fetch("/game/scratch/claim", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ indices: scratchedCells })
+            })
+            .then(res => res.json())
+            .then(claimData => {
+                if (claimData.error) {
+                    alert(claimData.error);
+                    document.getElementById("btn-play-submit").disabled = false;
+                    return;
+                }
+                
+                // Reveal all remaining cells
+                for (let i = 0; i < 9; i++) {
+                    const c = document.getElementById("scratch-cell-" + i);
+                    c.classList.add("scratched");
+                    c.innerText = scratchResponseData.symbols[i];
+                }
+                
+                // Show result
+                showResult(
+                    claimData.win,
+                    claimData.payout,
+                    claimData.details
+                );
+                updateHeaderBalance(claimData.new_balance);
+                document.getElementById("btn-play-submit").disabled = false;
+                document.getElementById("scratch-prompt").innerText = "Buy another card to scratch!";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Claim failed.");
+                document.getElementById("btn-play-submit").disabled = false;
+            });
+        } else {
+            document.getElementById("scratch-prompt").innerText = `Revealed ${scratchedCells.length}/3 cells. Scratch ${3 - scratchedCells.length} more!`;
+        }
+    }
+
+    // --- Crash Multiplier States ---
+    let crashFlying = false;
+    let crashVal = 1.00;
+    let crashTimer = null;
+    let flightBet = 0;
+    let crashAnimationStartTime = 0;
+
+    function handleCrashAction() {
+        const actionBtn = document.getElementById("btn-crash-action");
+        const betInput = document.getElementById("bet-amount");
+
+        if (!crashFlying) {
+            // Start flight
+            const betVal = parseInt(betInput.value);
+            if (isNaN(betVal) || betVal < 30) {
+                alert("Minimum bet is 30 credits!");
+                return;
+            }
+            actionBtn.disabled = true;
+
+            fetch("/game/crash/start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ bet: betVal })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    actionBtn.disabled = false;
+                    return;
+                }
+                
+                // Flight started
+                updateHeaderBalance(data.new_balance);
+                flightBet = betVal;
+                crashFlying = true;
+                crashVal = 1.00;
+                document.getElementById("result-container").style.display = "none";
+                const multDisplay = document.getElementById("crash-multiplier");
+                multDisplay.className = "crash-multiplier-display";
+                multDisplay.innerText = "1.00x";
+                
+                betInput.disabled = true;
+                actionBtn.innerText = "Cash Out";
+                actionBtn.style.background = "linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)";
+                actionBtn.disabled = false;
+                
+                // Start ticker animation
+                crashAnimationStartTime = Date.now();
+                runCrashTicker();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Server connection failed.");
+                actionBtn.disabled = false;
+            });
+        } else {
+            // Cash out click
+            actionBtn.disabled = true;
+            const cashOutVal = crashVal;
+            
+            fetch("/game/crash/cashout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ multiplier: cashOutVal })
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Cancel ticker immediately
+                cancelAnimationFrame(crashTimer);
+                crashFlying = false;
+                
+                betInput.disabled = false;
+                actionBtn.innerText = "Start Flight";
+                actionBtn.style.background = "";
+                actionBtn.disabled = false;
+
+                if (data.status === "win") {
+                    showResult(true, data.payout, `Cashed out at ${cashOutVal.toFixed(2)}x! Won ${data.payout} credits.`);
+                } else {
+                    // Coded as crash
+                    const multDisplay = document.getElementById("crash-multiplier");
+                    multDisplay.className = "crash-multiplier-display crashed";
+                    multDisplay.innerText = "CRASHED";
+                    showResult(false, 0, `Failed to cash out! Rocket crashed at ${data.crash_point}x.`);
+                }
+                updateHeaderBalance(data.new_balance);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Cashout failed.");
+                actionBtn.disabled = false;
+            });
+        }
+    }
+
+    function runCrashTicker() {
+        if (!crashFlying) return;
+        
+        const elapsed = (Date.now() - crashAnimationStartTime) / 1000;
+        // Exponential growth: multiplier grows slowly at start, faster later
+        crashVal = Math.min(10.00, 1.00 + Math.pow(elapsed, 1.4) * 0.2);
+        
+        const multDisplay = document.getElementById("crash-multiplier");
+        multDisplay.innerText = crashVal.toFixed(2) + "x";
+
+        // Draw graph representation
+        drawCrashGraph(elapsed, crashVal);
+
+        if (crashVal >= 10.00) {
+            // Max reached, crash trigger check automatically via server sync or wait cashout
+            // If they reach 10x and haven't cashed out, let's auto trigger cashout or crash check.
+            // We just wait or let it crash. To keep it simple, the server defines a crash point.
+            // If the elapsed time goes beyond the server's crash point, the client will auto-crash.
+            // To do this, we can fetch crash status, but better: if the server says it's a loss, it will crash.
+            // Wait, what if we let the backend tell the client when it crashed?
+            // Actually, we can poll or let the ticker check if it exceeds a maximum.
+            // But since the crash point is in the session, the client can just keep flying up to 10x.
+            // Let's call /game/crash/status or just let the client fly.
+            // Actually, let's make it so if they exceed 10x, they must cash out or it crashes.
+            // Let's do a simple check: if the client hits 10.00x, we auto-trigger cashout or auto-crash.
+            // Wait, we can poll the server or simply check if they crashed.
+            // A super elegant way: when starting, the server returns the crash point? No, then player can cheat.
+            // So when the player clicks Cash Out, the server validates it.
+            // What if the rocket crashes on its own? We need to show "CRASHED" on screen automatically when it reaches the crash point!
+            // Wait! How does the client know when it crashed without knowing the exact crash point in advance?
+            // Ah! The client can poll the server every 200ms, or we can just send the crash point encrypted (no, that's complex),
+            // or we can simply have the server return a countdown, or we can poll `/game/crash/status`.
+            // Wait! Polling is very easy! Or even simpler, when the client starts the flight, the server could send the crash point,
+            // but wait, is cheating a concern? "A locally-hosted virtual casino platform with no connection to real money".
+            // Since it is a local toy project, we could send the crash point in the response of `/game/crash/start` or we can poll.
+            // To make it look extremely smooth without any lag, sending the crash point in the response is actually super simple and ensures 100% smooth animations! Let's do that!
+            // Wait, if the crash point is sent in the start response, the JS knows exactly when to crash the rocket.
+            // Cheating is irrelevant because it's a local toy project running on the user's own machine anyway (they have full access to database, python code, and devtools).
+            // This is a brilliant realization! Returning the crash point in the JSON response makes the animation perfectly synced and 100% reliable with zero network lag!
+            // Let's make sure our start endpoint returns `crash_point`, and the client will automatically trigger the crash visual when `crashVal >= crash_point`.
+            // Let's write the client-side auto-crash logic:
+        }
+
+        if (crashFlying) {
+            // Check if crashed
+            if (crashVal >= crashPointFromServer) {
+                // Rocket Crashed!
+                crashFlying = false;
+                cancelAnimationFrame(crashTimer);
+                
+                const betInput = document.getElementById("bet-amount");
+                const actionBtn = document.getElementById("btn-crash-action");
+                betInput.disabled = false;
+                actionBtn.innerText = "Start Flight";
+                actionBtn.style.background = "";
+                actionBtn.disabled = false;
+
+                const multDisplay = document.getElementById("crash-multiplier");
+                multDisplay.className = "crash-multiplier-display crashed";
+                multDisplay.innerText = "CRASHED";
+                
+                showResult(false, 0, `Rocket crashed at ${crashPointFromServer.toFixed(2)}x!`);
+                
+                // Call server to finalize the crash loss
+                fetch("/game/crash/crashed", { method: "POST" });
+            } else {
+                crashTimer = requestAnimationFrame(runCrashTicker);
+            }
+        }
+    }
+
+    let crashPointFromServer = 1.0;
+    function drawCrashGraph(elapsed, val) {
+        const canvas = document.getElementById("crash-canvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = "#f39c12";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(0, canvas.height);
+        
+        // Draw rising curved line
+        const maxTime = 6; // scale factor
+        for (let x = 0; x <= canvas.width; x++) {
+            const ratio = x / canvas.width;
+            const t = ratio * elapsed;
+            const yVal = 1.00 + Math.pow(t, 1.4) * 0.2;
+            const yPos = canvas.height - (yVal - 1) * (canvas.height / 9);
+            ctx.lineTo(x, yPos);
+            if (t >= elapsed) break;
+        }
+        ctx.stroke();
+    }
+
+    // --- Hi-Lo Card deal update ---
+    let currentHiloCard = 7;
+    let currentHiloSuit = '♠';
+    const suitSymbols = { 'S': '♠', 'H': '♥', 'D': '♦', 'C': '♣' };
+    const suitNames = ['S', 'H', 'D', 'C'];
+    const cardRankNames = { 1: 'A', 11: 'J', 12: 'Q', 13: 'K' };
+
+    function getCardName(rank) {
+        return cardRankNames[rank] || rank.toString();
+    }
+
+    // Initialize Card on Hi-Lo page
+    if (gameId === 'hilo') {
+        // We will deal an initial card via JS or set from backend. Let's make a fetch request on load.
+        fetch("/game/hilo/deal")
+        .then(res => res.json())
+        .then(data => {
+            currentHiloCard = data.card;
+            currentHiloSuit = suitSymbols[data.suit] || data.suit;
+            updateHiloCardUI();
+        });
+    }
+
+    function updateHiloCardUI() {
+        const cardValEl = document.getElementById("hilo-card-val");
+        const cardSuitEl = document.getElementById("hilo-card-suit");
+        const cardValBotEl = document.getElementById("hilo-card-val-bot");
+        const cardEl = document.getElementById("hilo-card");
+        
+        const name = getCardName(currentHiloCard);
+        cardValEl.innerText = name;
+        cardValBotEl.innerText = name;
+        cardSuitEl.innerText = currentHiloSuit;
+
+        if (currentHiloSuit === '♥' || currentHiloSuit === '♦') {
+            cardEl.className = "playing-card red";
+        } else {
+            cardEl.className = "playing-card";
+        }
+    }
+
+    function playHilo(choice) {
+        const betInput = document.getElementById("bet-amount");
+        const betVal = parseInt(betInput.value);
+        if (isNaN(betVal) || betVal < 15) {
+            alert("Minimum bet is 15 credits!");
+            return;
+        }
+
+        fetch("/game/hilo/play", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bet: betVal, choice: choice })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Animate card flip transition
+            const cardEl = document.getElementById("hilo-card");
+            cardEl.style.transform = "rotateY(90deg)";
+            cardEl.style.transition = "transform 0.25s";
+            
+            setTimeout(() => {
+                // Update new card details
+                currentHiloCard = data.next_card;
+                currentHiloSuit = suitSymbols[data.next_suit] || data.next_suit;
+                updateHiloCardUI();
+                
+                cardEl.style.transform = "rotateY(0deg)";
+                
+                // Display result
+                if (data.status === "win") {
+                    showResult(true, data.payout, `Card was ${getCardName(data.next_card)}${currentHiloSuit}. Correct! Won ${data.payout} credits.`);
+                } else if (data.status === "push") {
+                    showResult(false, data.payout, `Card was ${getCardName(data.next_card)}${currentHiloSuit}. Push (Tie). Bet refunded.`, true);
+                } else {
+                    showResult(false, 0, `Card was ${getCardName(data.next_card)}${currentHiloSuit}. Wrong guess!`);
+                }
+                updateHeaderBalance(data.new_balance);
+            }, 250);
+        });
+    }
+
+    // --- General Game submit handler ---
+    function submitBet() {
+        const betInput = document.getElementById("bet-amount");
+        const betVal = parseInt(betInput.value);
+        const submitBtn = document.getElementById("btn-play-submit");
+
+        if (isNaN(betVal) || betVal < {{ game_info.min_bet }}) {
+            alert("Bet must be equal to or greater than the minimum bet of {{ game_info.min_bet }}!");
+            return;
+        }
+
+        submitBtn.disabled = true;
+        document.getElementById("result-container").style.display = "none";
+
+        // Assemble request body based on game type
+        let payload = { bet: betVal };
+        if (gameId === 'coin_flip') {
+            payload.choice = coinSide;
+        } else if (gameId === 'roulette') {
+            payload.choice = rouletteColor;
+        } else if (gameId === 'lucky_number') {
+            payload.choice = parseInt(document.getElementById("lucky-number-choice").value);
+        } else if (gameId === 'number_roulette') {
+            payload.choice = parseInt(document.getElementById("num-roulette-choice").value);
+        }
+
+        // Special handling for Scratch card - buy first then user scratches
+        if (gameId === 'scratch') {
+            fetch("/game/scratch/buy", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    submitBtn.disabled = false;
+                    return;
+                }
+                
+                // Card bought successfully
+                updateHeaderBalance(data.new_balance);
+                scratchResponseData = data;
+                scratchCardActive = true;
+                scratchedCells = [];
+                
+                // Reset board display
+                for (let i = 0; i < 9; i++) {
+                    const cell = document.getElementById("scratch-cell-" + i);
+                    cell.className = "scratch-cell";
+                    cell.innerText = "?";
+                }
+                
+                document.getElementById("scratch-prompt").innerText = "Card bought! Scratch (click) exactly 3 cells to reveal.";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Server error.");
+                submitBtn.disabled = false;
+            });
+            return;
+        }
+
+        // Send normal game requests
+        fetch(`/game/${gameId}/play`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                submitBtn.disabled = false;
+                return;
+            }
+
+            runGameAnimation(data, () => {
+                // Show final results
+                if (data.payout > 0) {
+                    if (data.payout === betVal) {
+                        showResult(false, data.payout, data.details, true); // Push
+                    } else {
+                        showResult(true, data.payout, data.details);
+                    }
+                } else {
+                    showResult(false, 0, data.details);
+                }
+                
+                updateHeaderBalance(data.new_balance);
+                submitBtn.disabled = false;
+            });
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error sending request.");
+            submitBtn.disabled = false;
+        });
+    }
+
+    // --- Animations Mapper ---
+    function runGameAnimation(data, callback) {
+        if (gameId === 'coin_flip') {
+            const coin = document.getElementById("coin-element");
+            coin.classList.add("flipping");
+            
+            setTimeout(() => {
+                coin.classList.remove("flipping");
+                coin.innerText = data.roll === 'heads' ? 'H' : 'T';
+                callback();
+            }, 1200);
+            
+        } else if (gameId === 'dice_roll') {
+            const dice = document.getElementById("dice-element");
+            dice.classList.add("rolling");
+            
+            const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+            let ticks = 0;
+            const rollInterval = setInterval(() => {
+                dice.innerText = diceFaces[Math.floor(Math.random() * 6)];
+                ticks++;
+                if (ticks > 8) {
+                    clearInterval(rollInterval);
+                    dice.classList.remove("rolling");
+                    dice.innerText = diceFaces[data.roll - 1];
+                    callback();
+                }
+            }, 100);
+
+        } else if (gameId === 'slots') {
+            const r1 = document.getElementById("reel-1");
+            const r2 = document.getElementById("reel-2");
+            const r3 = document.getElementById("reel-3");
+            
+            const symbols = ['🍒', '🍋', '🍊', '🍇', '🔔', '💎'];
+            let ticks = 0;
+            
+            const slotInterval = setInterval(() => {
+                r1.innerText = symbols[Math.floor(Math.random() * 6)];
+                r2.innerText = symbols[Math.floor(Math.random() * 6)];
+                r3.innerText = symbols[Math.floor(Math.random() * 6)];
+                ticks++;
+                
+                if (ticks > 12) {
+                    clearInterval(slotInterval);
+                    r1.innerText = data.roll[0];
+                    r2.innerText = data.roll[1];
+                    r3.innerText = data.roll[2];
+                    callback();
+                }
+            }, 100);
+
+        } else if (gameId === 'roulette') {
+            const display = document.getElementById("roulette-wheel-result");
+            display.innerText = "Spinning...";
+            
+            let ticks = 0;
+            const rollInterval = setInterval(() => {
+                display.innerText = "🎡 Slot: " + Math.floor(Math.random() * 37);
+                ticks++;
+                
+                if (ticks > 12) {
+                    clearInterval(rollInterval);
+                    display.innerText = `🎡 Number: ${data.roll} (${data.roll_color.toUpperCase()})`;
+                    callback();
+                }
+            }, 100);
+
+        } else if (gameId === 'lucky_number') {
+            const display = document.getElementById("lucky-num-result");
+            display.innerText = "?";
+            
+            let ticks = 0;
+            const rollInterval = setInterval(() => {
+                display.innerText = Math.floor(Math.random() * 10) + 1;
+                ticks++;
+                
+                if (ticks > 10) {
+                    clearInterval(rollInterval);
+                    display.innerText = data.roll;
+                    callback();
+                }
+            }, 100);
+
+        } else if (gameId === 'plinko') {
+            animatePlinko(data.path, callback);
+
+        } else if (gameId === 'war') {
+            const pVal = document.getElementById("war-p-val");
+            const pValBot = document.getElementById("war-p-val-bot");
+            const pSuit = document.getElementById("war-p-suit");
+            
+            const dVal = document.getElementById("war-d-val");
+            const dValBot = document.getElementById("war-d-val-bot");
+            const dSuit = document.getElementById("war-d-suit");
+            
+            const pCard = document.getElementById("war-player-card");
+            const dCard = document.getElementById("war-dealer-card");
+
+            pVal.innerText = "?"; pValBot.innerText = "?";
+            dVal.innerText = "?"; dValBot.innerText = "?";
+            
+            pCard.style.transform = "scale(0.8)";
+            dCard.style.transform = "scale(0.8)";
+            
+            setTimeout(() => {
+                pCard.style.transform = "scale(1)";
+                pCard.style.transition = "transform 0.2s";
+                pVal.innerText = getCardName(data.player_card);
+                pValBot.innerText = getCardName(data.player_card);
+                pSuit.innerText = suitSymbols[data.player_suit] || data.player_suit;
+                if (data.player_suit === 'H' || data.player_suit === 'D') pCard.className = "playing-card red";
+                else pCard.className = "playing-card";
+            }, 300);
+
+            setTimeout(() => {
+                dCard.style.transform = "scale(1)";
+                dCard.style.transition = "transform 0.2s";
+                dVal.innerText = getCardName(data.dealer_card);
+                dValBot.innerText = getCardName(data.dealer_card);
+                dSuit.innerText = suitSymbols[data.dealer_suit] || data.dealer_suit;
+                if (data.dealer_suit === 'H' || data.dealer_suit === 'D') dCard.className = "playing-card red";
+                else dCard.className = "playing-card";
+            }, 800);
+
+            setTimeout(callback, 1400);
+
+        } else if (gameId === 'number_roulette') {
+            const display = document.getElementById("num-roulette-result");
+            display.innerText = "Spinning...";
+            
+            let ticks = 0;
+            const rollInterval = setInterval(() => {
+                display.innerText = "🎰 Slot: " + Math.floor(Math.random() * 37);
+                ticks++;
+                
+                if (ticks > 12) {
+                    clearInterval(rollInterval);
+                    display.innerText = `🎰 Landed: ${data.roll}`;
+                    callback();
+                }
+            }, 100);
+
+        } else if (gameId === 'wheel') {
+            const wheel = document.getElementById("wheel-element");
+            // 8 segments, so 45deg each. Segments are: 3x (index 0), 0x (index 1), 1.5x (index 2), 0x (index 3), 2x (index 4), 0x (index 5), 5x (index 6), 0x (index 7).
+            // Calculate landing angle. Note: angle starts at 0 (top-ish).
+            // Each segment is 45 degrees. The pointer points at the top (0 deg).
+            // To align segment index N with the top, we need to rotate the wheel by:
+            // 360 - (N * 45) - 22.5 degrees.
+            const targetRotation = 360 * 3 + (360 - (data.roll_index * 45) - 22.5);
+            
+            wheel.style.transform = `rotate(${targetRotation}deg)`;
+            wheel.style.transition = "transform 2.5s cubic-bezier(0.1, 0.8, 0.1, 1)";
+            
+            setTimeout(() => {
+                callback();
+                // Reset transition and lock visual angle for next spins
+                setTimeout(() => {
+                    wheel.style.transition = "none";
+                    wheel.style.transform = `rotate(${targetRotation % 360}deg)`;
+                }, 100);
+            }, 2600);
+
+        } else {
+            callback();
+        }
+    }
+
+    // --- Plinko simulation ---
+    function animatePlinko(path, callback) {
+        const canvas = document.getElementById("plinko-canvas");
+        if (!canvas) { callback(); return; }
+        const ctx = canvas.getContext("2d");
+        
+        const rows = 5;
+        const startX = canvas.width / 2;
+        const startY = 30;
+        const spacingX = 40;
+        const spacingY = 40;
+        
+        // Setup Peg board positions
+        let pegs = [];
+        for (let r = 0; r < rows; r++) {
+            const rowPegCount = r + 3; // rows of pegs
+            const rowStartX = startX - ((rowPegCount - 1) * spacingX) / 2;
+            const y = startY + r * spacingY;
+            for (let c = 0; c < rowPegCount; c++) {
+                pegs.push({ x: rowStartX + c * spacingX, y: y });
+            }
+        }
+        
+        // Path simulation nodes
+        let ballPathNodes = [{ x: startX, y: startY - 15 }];
+        let currX = startX;
+        let currY = startY - 15;
+        
+        // Pegs bounce tracking
+        for (let r = 0; r < rows; r++) {
+            currY += spacingY;
+            const direction = path[r]; // 0 = left, 1 = right
+            currX += (direction === 1 ? 1 : -1) * (spacingX / 2);
+            ballPathNodes.push({ x: currX, y: currY });
+        }
+        
+        // Landing bin position
+        currY += 40;
+        ballPathNodes.push({ x: currX, y: currY });
+
+        let frame = 0;
+        let nodeIdx = 0;
+        let ballX = ballPathNodes[0].x;
+        let ballY = ballPathNodes[0].y;
+        
+        const stepsPerNode = 20;
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Pegs
+            ctx.fillStyle = "#ffffff";
+            pegs.forEach(peg => {
+                ctx.beginPath();
+                ctx.arc(peg.x, peg.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw Ball
+            ctx.fillStyle = "#e74c3c";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#e74c3c";
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0; // reset
+        }
+
+        function stepBall() {
+            if (nodeIdx < ballPathNodes.length - 1) {
+                const startNode = ballPathNodes[nodeIdx];
+                const endNode = ballPathNodes[nodeIdx + 1];
+                const ratio = frame / stepsPerNode;
+                
+                // Interpolate position
+                ballX = startNode.x + (endNode.x - startNode.x) * ratio;
+                // Add a little bounce curve on Y
+                ballY = startNode.y + (endNode.y - startNode.y) * ratio;
+                
+                frame++;
+                if (frame > stepsPerNode) {
+                    nodeIdx++;
+                    frame = 0;
+                }
+                drawBoard();
+                requestAnimationFrame(stepBall);
+            } else {
+                callback();
+            }
+        }
+        
+        drawBoard();
+        stepBall();
+    }
+
+    // --- Result Banner Handler ---
+    function showResult(isWin, payout, details, isPush = false) {
+        const container = document.getElementById("result-container");
+        const msg = document.getElementById("result-msg");
+        container.style.display = "block";
+        
+        if (isWin) {
+            msg.className = "result-message win";
+            msg.innerHTML = `🎉 <strong>Win!</strong> Payout: ${payout} Cr<br><span style="font-size: 0.9rem; opacity: 0.9;">${details}</span>`;
+        } else if (isPush) {
+            msg.className = "result-message push";
+            msg.innerHTML = `🤝 <strong>Push!</strong> Bet Refunded<br><span style="font-size: 0.9rem; opacity: 0.9;">${details}</span>`;
+        } else {
+            msg.className = "result-message loss";
+            msg.innerHTML = `💸 <strong>Loss!</strong> Bet lost.<br><span style="font-size: 0.9rem; opacity: 0.9;">${details}</span>`;
+        }
+    }
+</script>
+{% endblock %}

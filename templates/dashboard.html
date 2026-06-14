@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - VaultBet{% endblock %}
+
+{% block content %}
+<div class="section-title">
+    <span>🎰 Virtual Game Floor</span>
+</div>
+
+<!-- Game Grid -->
+<div class="game-grid">
+    <!-- Game 1: Coin Flip -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Coin Flip</h3>
+            <span class="game-min-bet">Min: 10 Cr</span>
+        </div>
+        <p class="game-desc">A classic 50/50 double-or-nothing bet. Call heads or tails and watch the coin spin.</p>
+        <a href="/game/coin_flip" class="btn-play">Play Coin Flip</a>
+    </div>
+
+    <!-- Game 2: Dice Roll -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Dice Roll</h3>
+            <span class="game-min-bet">Min: 15 Cr</span>
+        </div>
+        <p class="game-desc">Roll a single six-sided die. Roll a 4, 5, or 6 to win a sweet 1.8x payout.</p>
+        <a href="/game/dice_roll" class="btn-play">Play Dice Roll</a>
+    </div>
+
+    <!-- Game 3: Slot Machine -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Slot Machine</h3>
+            <span class="game-min-bet">Min: 20 Cr</span>
+        </div>
+        <p class="game-desc">Spin the virtual reels. Get 3 matching symbols for 10x, or 2 matching for 1.5x.</p>
+        <a href="/game/slots" class="btn-play">Spin Slots</a>
+    </div>
+
+    <!-- Game 4: Roulette -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Roulette</h3>
+            <span class="game-min-bet">Min: 25 Cr</span>
+        </div>
+        <p class="game-desc">Bet on Red, Black, or Green. Green pays a massive 14x, others double your bet.</p>
+        <a href="/game/roulette" class="btn-play">Play Roulette</a>
+    </div>
+
+    <!-- Game 5: Hi-Lo Card -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Hi-Lo Card</h3>
+            <span class="game-min-bet">Min: 15 Cr</span>
+        </div>
+        <p class="game-desc">Will the next card drawn (1–13) be higher or lower than the shown card? Guess right for 1.9x.</p>
+        <a href="/game/hilo" class="btn-play">Play Hi-Lo</a>
+    </div>
+
+    <!-- Game 6: Lucky Number -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Lucky Number</h3>
+            <span class="game-min-bet">Min: 20 Cr</span>
+        </div>
+        <p class="game-desc">Pick your lucky number from 1 to 10. If the house draws your number, win 8x.</p>
+        <a href="/game/lucky_number" class="btn-play">Play Lucky Number</a>
+    </div>
+
+    <!-- Game 7: Crash Multiplier -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Crash Multiplier</h3>
+            <span class="game-min-bet">Min: 30 Cr</span>
+        </div>
+        <p class="game-desc">Watch the multiplier climb from 1.0x to 10.0x. Cash out before it crashes or lose it all.</p>
+        <a href="/game/crash" class="btn-play">Play Crash</a>
+    </div>
+
+    <!-- Game 8: Scratch Card -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Scratch Card</h3>
+            <span class="game-min-bet">Min: 10 Cr</span>
+        </div>
+        <p class="game-desc">Scratch 3 hidden cells on a 3x3 card. Match 2 cells for 2x, or 3 cells for a huge 15x.</p>
+        <a href="/game/scratch" class="btn-play">Scratch Card</a>
+    </div>
+
+    <!-- Game 9: Plinko Drop -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Plinko Drop</h3>
+            <span class="game-min-bet">Min: 25 Cr</span>
+        </div>
+        <p class="game-desc">Drop the ball through the pegboard. Payout depends on which bucket it lands in (up to 3x).</p>
+        <a href="/game/plinko" class="btn-play">Play Plinko</a>
+    </div>
+
+    <!-- Game 10: War (Card Battle) -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">War (Card Battle)</h3>
+            <span class="game-min-bet">Min: 20 Cr</span>
+        </div>
+        <p class="game-desc">Draw a card against the dealer. The higher card wins 1.9x. Ties are refunded.</p>
+        <a href="/game/war" class="btn-play">Play War</a>
+    </div>
+
+    <!-- Game 11: Number Roulette -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Number Roulette</h3>
+            <span class="game-min-bet">Min: 20 Cr</span>
+        </div>
+        <p class="game-desc">Choose a single exact number between 0 and 36. An exact match pays a whopping 30x!</p>
+        <a href="/game/number_roulette" class="btn-play">Play Number Roulette</a>
+    </div>
+
+    <!-- Game 12: Wheel of Fortune -->
+    <div class="game-card">
+        <div class="game-card-header">
+            <h3 class="game-name">Wheel of Fortune</h3>
+            <span class="game-min-bet">Min: 15 Cr</span>
+        </div>
+        <p class="game-desc">Spin the 8-segment wheel. Win up to 5x your bet, or dodge the 0x crash spaces.</p>
+        <a href="/game/wheel" class="btn-play">Spin the Wheel</a>
+    </div>
+</div>
+
+<!-- Recent Activity / History -->
+<div class="leaderboard-wrapper" style="margin-top: 3rem; padding: 2rem;">
+    <h3 class="widget-title" style="font-size: 1.3rem; margin-bottom: 1rem;">📜 Your Recent Game History</h3>
+    {% if history %}
+    <table class="leaderboard-table" style="margin-top: 0.5rem;">
+        <thead>
+            <tr>
+                <th>Game</th>
+                <th>Bet (Credits)</th>
+                <th>Payout (Credits)</th>
+                <th>Outcome details</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in history %}
+            <tr>
+                <td style="font-weight: 600;">{{ record.game_name }}</td>
+                <td>{{ record.bet }} Cr</td>
+                <td class="{% if record.payout > record.bet %}neon-green{% elif record.payout < record.bet %}neon-red{% endif %}" style="font-weight: 600;">
+                    {% if record.payout > record.bet %}
+                    +{{ record.payout - record.bet }} (Win)
+                    {% elif record.payout == record.bet %}
+                    {{ record.payout }} (Push)
+                    {% else %}
+                    -{{ record.bet - record.payout }} (Loss)
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-secondary); font-size: 0.9rem;">{{ record.result_details }}</td>
+                <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ record.timestamp.split('T')[0] }} {{ record.timestamp.split('T')[1][:8] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--text-secondary); text-align: center; padding: 1.5rem 0;">You haven't played any games yet. Place your first bet above!</p>
+    {% endif %}
+</div>
+{% endblock %}

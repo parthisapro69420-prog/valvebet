@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}VaultBet Casino{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    {% if user and user.balance < 0 %}
+    <!-- Debt Warning Banner -->
+    <div class="debt-banner">
+        ⚠️ IN DEBT: Your balance is negative ({{ user.balance }} credits). Please repay your loans or win credits to restore your account balance!
+    </div>
+    {% endif %}
+
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo-link">
+                <h1 class="logo-text">Vault<span>Bet</span></h1>
+            </a>
+            
+            <div class="nav-right">
+                {% if user %}
+                <div class="nav-links">
+                    <a href="/" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">Games</a>
+                    <a href="/leaderboard" class="nav-link {% if active_page == 'leaderboard' %}active{% endif %}">Leaderboard</a>
+                </div>
+                
+                <!-- Balance indicator -->
+                <div class="balance-badge {% if user.balance >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if user.balance < 0 %}
+                    ⚠️ IN DEBT: {{ user.balance }} Cr
+                    {% else %}
+                    💰 {{ user.balance }} Cr
+                    {% endif %}
+                </div>
+                
+                <span class="user-badge">👤 {{ user.username }}</span>
+                <a href="/auth/logout" class="btn-logout">Logout</a>
+                {% else %}
+                <div class="nav-links">
+                    <a href="/auth/login" class="nav-link">Login</a>
+                    <a href="/auth/register" class="nav-link">Register</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="layout-container">
+        <!-- Main Content Area -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        {% if user %}
+        <!-- Sidebar with Loan Widget -->
+        <aside class="sidebar">
+            <!-- Loan Widget -->
+            <div class="widget">
+                <h3 class="widget-title">🏦 Virtual Bank Loan</h3>
+                
+                {% if active_loan %}
+                <!-- Active Loan Info -->
+                <div class="loan-stats">
+                    <div class="loan-stat-row">
+                        <span class="loan-stat-label">Borrowed:</span>
+                        <span class="loan-stat-value">{{ active_loan.amount }} credits</span>
+                    </div>
+                    <div class="loan-stat-row">
+                        <span class="loan-stat-label">Owed (20% Int):</span>
+                        <span class="loan-stat-value">{{ active_loan.repay_amount }} credits</span>
+                    </div>
+                    <div class="loan-stat-row">
+                        <span class="loan-stat-label">Time Remaining:</span>
+                        <span class="loan-stat-value danger" id="loan-timer">--:--</span>
+                    </div>
+                </div>
+                
+                <form action="/loan/repay" method="post">
+                    <button type="submit" class="btn-loan-repay">Repay Loan ({{ active_loan.repay_amount }} Cr)</button>
+                </form>
+                
+                {% else %}
+                <!-- Request Loan Form -->
+                <form action="/loan/take" method="post" class="loan-choice-form">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                        Need quick credits? Take a 5-minute loan. Note: Flat 20% interest is added, and default will result in a <strong>permanent account ban</strong>.
+                    </p>
+                    <div class="loan-options">
+                        <input type="radio" name="amount" id="loan-100" value="100" checked class="loan-option-radio">
+                        <label for="loan-100" class="loan-option-label">100 Cr</label>
+                        
+                        <input type="radio" name="amount" id="loan-250" value="250" class="loan-option-radio">
+                        <label for="loan-250" class="loan-option-label">250 Cr</label> <!-- Typo check: 250 credits -->
+                        <script>
+                            // Correcting visual label dynamically or manually, let's keep it exact: 250
+                        </script>
+                        
+                        <input type="radio" name="amount" id="loan-500" value="500" class="loan-option-radio">
+                        <label for="loan-500" class="loan-option-label">500 Cr</label>
+                    </div>
+                    <button type="submit" class="btn-loan-take">Request Loan</button>
+                </form>
+                {% endif %}
+            </div>
+            
+            {% block sidebar_extra %}{% endblock %}
+        </aside>
+        {% endif %}
+    </div>
+
+    {% if user and active_loan %}
+    <!-- Loan timer countdown script -->
+    <script>
+        (function() {
+            const deadlineStr = "{{ active_loan.deadline }}";
+            if (!deadlineStr) return;
+
+            const deadline = new Date(deadlineStr).getTime();
+            const timerElement = document.getElementById("loan-timer");
+            if (!timerElement) return;
+
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const distance = deadline - now;
+
+                if (distance <= 0) {
+                    timerElement.innerText = "DEFAULTED";
+                    clearInterval(timerInterval);
+                    // Force refresh to trigger suspension check
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    timerElement.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }
+            };
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        })();
+    </script>
+    {% endif %}
+
+</body>
+</html>
