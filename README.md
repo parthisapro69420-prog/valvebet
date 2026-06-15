@@ -4,6 +4,7 @@
 > Built with **FastAPI** · **SQLite** · **Jinja2** · **Vanilla CSS/JS** — runs entirely on `localhost:8000`.
 
 ---
+![image of main menu](screenshot.png)
 
 ## ⚠️ Disclaimer
 
@@ -96,6 +97,8 @@ Register a new account → receive 500 starting credits → start playing!
 | 11 | Number Roulette | 20 | Pick exact 0–36 · 30× |
 | 12 | Wheel of Fortune | 15 | 8-segment wheel · Up to 5× |
 
+
+![image of slot machine game](screenshot2.png)
 Each game features:
 - **"How to Play" tutorial modal** — shown automatically on first visit (stored in `localStorage`)
 - **ⓘ Info button** to re-open the guide at any time
